@@ -1,0 +1,1 @@
+sudo python sensor/sniffer.py --iface wlan0mon --outfile ../captures.jsonl
