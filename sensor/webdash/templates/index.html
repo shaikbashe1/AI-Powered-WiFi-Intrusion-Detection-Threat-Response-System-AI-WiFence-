@@ -1,0 +1,44 @@
+# webdash/app.py
+from flask import Flask, render_template, jsonify
+import json
+import os
+
+app = Flask(__name__, template_folder="templates")
+CAPTURE_FILE = os.path.join(os.path.dirname(__file__), "..", "captures.jsonl")
+ALERTS_FILE = os.path.join(os.path.dirname(__file__), "..", "alerts.log")
+
+def load_recent_captures(limit=50):
+    if not os.path.exists(CAPTURE_FILE):
+        return []
+    out=[]
+    with open(CAPTURE_FILE, "r") as f:
+        for line in f:
+            try:
+                out.append(json.loads(line))
+            except:
+                pass
+    return out[-limit:]
+
+def load_alerts(limit=50):
+    if not os.path.exists(ALERTS_FILE):
+        return []
+    out=[]
+    with open(ALERTS_FILE,"r") as f:
+        for l in f:
+            out.append(l.strip())
+    return out[-limit:]
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/api/captures")
+def api_captures():
+    return jsonify(load_recent_captures())
+
+@app.route("/api/alerts")
+def api_alerts():
+    return jsonify(load_alerts())
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
